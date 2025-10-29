@@ -12,13 +12,20 @@ function initializeDefaultChatChannel(api) {
       return;
     }
 
+    const publicChannels = chat?.chatChannelsManager?.publicMessageChannels;
+    if (!publicChannels) {
+      console.log("DefaultChatChannel: No public channels configured.");
+      return;
+    }
     const targetChannelName = settings.default_chat_channel_name;
     if (!targetChannelName) {
-      console.log("No default chat channel name configured");
+      console.log("DefaultChatChannel: No default chat channel name configured. Available channels:");
+      publicChannels.forEach(channel => {
+        console.log("- " + channel.unicodeTitle);
+      });
       return;
     }
 
-    const publicChannels = chat?.chatChannelsManager?.publicMessageChannels;
     const targetChannel = publicChannels.find(
       channel => channel.unicodeTitle === targetChannelName
     );
@@ -26,8 +33,7 @@ function initializeDefaultChatChannel(api) {
       var router = api.container.lookup("service:router");
       router.transitionTo('chat.channel', ...targetChannel.routeModels);
     } else {
-      console.log("Target channel not found: " + targetChannelName);
-      console.log("Available channels:");
+      console.log("DefaultChatChannel: Target channel '" + targetChannelName + "' not found. Available channels:");
       publicChannels.forEach(channel => {
         console.log("- " + channel.unicodeTitle);
       });
