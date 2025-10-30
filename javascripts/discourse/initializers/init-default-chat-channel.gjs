@@ -1,17 +1,7 @@
 import { withPluginApi } from "discourse/lib/plugin-api";
 import { later } from "@ember/runloop";
 
-function initializeDefaultChatChannel(api) {
-  later(() => {
-    var currentUser = api.container.lookup('current-user:main');
-    if (!currentUser) {
-      return; // not logged in
-    }
-    var chat = api.container.lookup("service:chat");
-    if (!chat || chat.activeChannel) { // if chat disabled, or already open
-      return;
-    }
-
+function openDefaultChatChannel(chat, api) {
     const publicChannels = chat?.chatChannelsManager?.publicMessageChannels;
     if (!publicChannels) {
       console.log("DefaultChatChannel: No public channels configured.");
@@ -38,7 +28,30 @@ function initializeDefaultChatChannel(api) {
         console.log("- " + channel.unicodeTitle);
       });
     }
-  }, 1000);
+}
+
+function initializeDefaultChatChannel(api) {
+  const currentUser = api.container.lookup('current-user:main');
+  if (!currentUser) {
+    return; // not logged in
+  }
+
+  const chat = api.container.lookup("service:chat");
+  if (!chat) {
+    return; // chat not enabled
+  }
+
+  chat.loadChannels().then(() => {
+    if (chat.activeChannel) {
+      return; // chat already open
+    }
+    // at this point .has-full-page-chat is not present yet
+    const site = api.container.lookup("service:site");
+    if (site.mobileView) {
+      return; // in mobile view, chat would take full page
+    }
+    openDefaultChatChannel(chat, api);
+  });
 }
 
 export default {
