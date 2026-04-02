@@ -2,6 +2,7 @@ import { withPluginApi } from "discourse/lib/plugin-api";
 import { later } from "@ember/runloop";
 
 function openDefaultChatChannel(chat, api) {
+
     const publicChannels = chat?.chatChannelsManager?.publicMessageChannels;
     if (!publicChannels) {
       console.log("DefaultChatChannel: No public channels configured.");
@@ -31,7 +32,7 @@ function openDefaultChatChannel(chat, api) {
 }
 
 function initializeDefaultChatChannel(api) {
-  const currentUser = api.container.lookup('current-user:main');
+  const currentUser = api.container.lookup('service:current-user');
   if (!currentUser) {
     return; // not logged in
   }
